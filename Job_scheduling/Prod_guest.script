@@ -1,0 +1,26 @@
+#!/bin/bash
+#SBATCH --requeue
+#SBATCH --job-name=${ECOS}
+#SBATCH --account=owner-guest #account name, typically PI lastname
+#SBATCH --partition=notchpeak-shared-guest #partition
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=10   # Number of CPU cores per task
+##SBATCH --mem=960G            # this parameter is determined by the script with name year_array_slurm...
+#SBATCH --time=72:00:00      # Wall clock time (hh:mm:ss)
+#SBATCH --output=%x_%j.out  # Output file (%j will be replaced by job ID)
+#SBATCH --error=%x_%j.err
+#SBATCH --mail-user=u6054045@utah.edu
+#SBATCH --mail-type=FAIL
+
+# Log file to track resubmissions
+LOG_FILE="resubmission_log.txt"
+
+
+
+source /uufs/chpc.utah.edu/common/home/dycelab/data/Lidar/py39/bin/activate
+
+# Your R script to run
+python /uufs/chpc.utah.edu/common/home/dycelab/data/Lidar/ABoVE/data_code/Pred_prod2.py --years "$YEARS" --ecos "$ECOS" --process_tile "$PROCESS_TILE" --nrep "$NREP" --model "$MODEL"
+
+

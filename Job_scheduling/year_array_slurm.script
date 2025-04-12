@@ -1,0 +1,31 @@
+#!/bin/bash
+#SBATCH --job-name=EcosJobs
+#SBATCH --job-name=pred #this will be over written 
+#SBATCH --account=owner-guest #account name
+#SBATCH --partition=notchpeak-shared-guest #partition
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+##SBATCH --cpus-per-task=10   # Number of CPU cores per task
+##SBATCH --mem=960G            # doesn't really matter here as this code is to submit job
+#SBATCH --time=72:00:00      # Wall clock time (hh:mm:ss)
+#SBATCH --output=%x_%j.out  # Output file (%j will be replaced by job ID)
+#SBATCH --error=%x_%j.err
+#SBATCH --mail-user=u6054045@utah.edu
+#SBATCH --mail-type=FAIL # the system will send you an email if the job is failed due to any error
+#SBATCH --array=0-1  # number of jobs per year and eco
+
+# Define ECOS options
+ECOS_LIST=('GP' 'HP' 'NF' 'NWFM' 'TG')
+
+# Get the ECOS value for this array task
+ECOS=${ECOS_LIST[$SLURM_ARRAY_TASK_ID]}
+
+# Submit the job with the corresponding ECOS value
+
+# Define the range of YEARS (1984-2024), parameters YEARS, ECOS, PROCESS_TILE, NREP, and MODEL are all parameters passed to python code
+for YEAR in {1984..2022..1}; do
+    for ECOS in "${ECOS_LIST[@]}"; do
+        sbatch --requeue --job-name=${ECOS}_${YEAR} --mem=200G \
+          --export=YEARS="$YEAR",ECOS="$ECOS",PROCESS_TILE=1,NREP=50,MODEL=F30 Prod_guest.script
+    done
+done
